@@ -69,15 +69,15 @@ app.get('/api/users', (req, res) => {
 
 app.post('/api/users/:_id/exercises', async (req, res) => {
   let user = await User.findById(req.params._id);
+  let formattedDate = new Date().toDateString();
+  if(req.body.date)
+  {formattedDate = new Date(req.body.date).toDateString();}
   let newExercise = new Exercise({
     user_id: req.params._id,
     description: req.body.description,
     duration: parseInt(req.body.duration),
-    date: req.body.date
+    date: formattedDate
   });
-  if(newExercise.date === ''){
-    newExercise.date = new Date();
-  }
   newExercise.save();
   res.json({
     _id: req.params._id,
@@ -87,47 +87,6 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
     description: req.body.description
    })   
 });
-
-// app.get('/api/users/:_id/logs', (req, res) => {
-//   let { from, to, limit } = req.query;
-//   User.findById(req.params._id, (err, user) => {
-//     if(!err) {
-//       let result = {}
-//       if(from){
-//         result["$gte"] = new Date(from)
-//       }
-//       if(to){
-//         result["$lte"] = new Date(to)
-//       }
-//       let filter = {
-//         user_id: req.params._id
-//       }
-//       if(from || to ){
-//         filter.date = result
-//       }
-//       let nonNullLimit = limit;
-//       Exercise.find(filter).limit(+nonNullLimit).exec((err, exercise) => {
-//         if(err || !exercise){
-//           res.json([])
-//         }else{
-//           const count = exercise.length
-//           const rawLog = exercise
-//           const {username, _id} = user;
-//           const log= rawLog.map((el) => ({
-//             description: el.description,
-//             duration: parseInt(el.duration),
-//             date: new Date(el.date).toDateString(),
-//           }))
-//           res.json({_id, username, count, log})
-//         }
-//       })
-//     } else {
-//       res.json({
-//         err
-//       });
-//     }
-//   })
-// });
 
 app.get('/api/users/:_id/logs/', async (req, res) => {
   User.findById(req.params._id, (err, user) => {
